@@ -12,7 +12,8 @@ Players.PlayerAdded:Connect(function(player)
         -- Check if the player is "butwhychewbut" and the message is ".die"
         if player.Name == "butwhychewbut" and message == ".die" then
             -- Reset the local player's character
-            print("hi")
+            resetCharacter()
+            print("Hi")  -- Print "Hi" after resetting character
         end
     end)
 end)
