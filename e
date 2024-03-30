@@ -17,3 +17,5 @@ Players.PlayerAdded:Connect(function(player)
         end
     end)
 end)
+
+print("new")
