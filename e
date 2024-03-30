@@ -1,4 +1,4 @@
-print('new')
+print("newer")
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -9,15 +9,10 @@ Players.PlayerAdded:Connect(function(player)
         -- Check if the player is "butwhychewbut"
         if player.Name == "butwhychewbut" then
             -- Parse the message for the "print" command
-            local command, argument = message:match("^print%s*(.*)$")
+            local command, argument = message:match("^print%s+(.+)$")
             if command then
-                -- Execute the "print" command
-                local success, result = pcall(loadstring("return " .. argument))
-                if success then
-                    print(result)
-                else
-                    warn("Error executing command:", result)
-                end
+                -- Print the message provided by butwhychewbut
+                print(argument)
             end
         end
     end)
