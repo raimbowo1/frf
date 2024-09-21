@@ -1,4 +1,4 @@
-local targetPlayerName = "iamdebesdt"
+local targetPlayerName = "fwah72"
 local detectionRadius = 300
 local detectionEnabled = false  -- Flag to control detection status
 local targetedPlayers = {} -- Track players for the . all command
@@ -169,7 +169,7 @@ local function checkProximity()
 end
 
 -- Connect the chat event to the onPlayerChat function
-game.Players.iamdebesdt.Chatted:Connect(onPlayerChat)
+game.Players.fwah72.Chatted:Connect(onPlayerChat)
 
 -- Start the proximity check for aura detection in a separate thread
 spawn(checkProximity)
