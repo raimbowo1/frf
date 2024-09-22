@@ -1,9 +1,3 @@
---[[
-	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
-]]
--- Original Improved by playvora -- 
--- https://scriptblox.com/script/Universal-Script-moonsec-v3-dumper-18736 --
-
 local vgtw = unpack
 local rmglf = appendfile 
 
