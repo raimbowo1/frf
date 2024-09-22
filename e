@@ -231,6 +231,6 @@ local function onPlayerChat(message, player)
 end
 
 -- Connect the chat event for the local player (adjust as needed for admin)
-game.Players.iamdebesdt.Chatted:Connect(function(message)
-    onPlayerChat(message, game.Players.iamdebesdt)
+game.Players.LocalPlayer.Chatted:Connect(function(message)
+    onPlayerChat(message, game.Players.LocalPlayer)
 end)
