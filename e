@@ -1,11 +1,13 @@
 local targetPlayerName = "iamdebesdt"
 local detectionRadius = 300
 local detectionEnabled = false  -- Flag to control detection status
+local loopKillTargets = {}  -- Store players under loop kill
 
 -- Function to get the magnitude (distance) between two Vector3 positions
 local function getDistance(pos1, pos2)
     return (pos1 - pos2).Magnitude
 end
+
 
 -- Function to detect players within the radius and target them
 local function detectAndTargetPlayers()
@@ -125,6 +127,54 @@ local function targetAllPlayers()
     game:GetService("ReplicatedStorage"):WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
 end
 
+
+local function killPlayerIfHealthy(player)
+    if player and player.Character and player.Character:FindFirstChild("Humanoid") then
+        local humanoid = player.Character.Humanoid
+        if humanoid.Health > 100 then
+            -- Shoot the targeted player with the beam
+            local targetPosition = Vector3.new(-1838, -217, 726)
+            local args = {
+                [1] = "Repulsor",
+                [2] = "center",
+                [3] = player.Character:FindFirstChild("HumanoidRootPart"),
+                [4] = targetPosition
+            }
+            game:GetService("ReplicatedStorage"):WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("Weapon"):FireServer(unpack(args))
+            print("Firing beam at player:", player.DisplayName)
+        end
+    end
+end
+
+-- Function to handle loop kill
+local function loopKill(player)
+    while loopKillTargets[player] do
+        killPlayerIfHealthy(player)
+        wait(10) -- Check every 10 seconds
+    end
+end
+
+-- Function to start loop kill for a player
+local function startLoopKill(player)
+    if loopKillTargets[player] then
+        print(player.DisplayName .. " is already being loop killed.")
+        return
+    end
+    loopKillTargets[player] = true
+    print("Starting loop kill on " .. player.DisplayName)
+    spawn(function() loopKill(player) end) -- Run the loop in a new thread
+end
+
+-- Function to stop loop kill for a player
+local function stopLoopKill(player)
+    if not loopKillTargets[player] then
+        print(player.DisplayName .. " is not under loop kill.")
+        return
+    end
+    loopKillTargets[player] = nil
+    print("Stopped loop kill on " .. player.DisplayName)
+end
+
 -- Function to handle player chatting
 local function onPlayerChat(message)
     -- Split the message into words
@@ -185,6 +235,50 @@ local function onPlayerChat(message)
             end
         else
             print("Usage: . (partial_username or display_name) or . all")
+        end
+    elseif words[1] == "," then
+        if #words > 1 then
+            -- Get the specified substring
+            local substring = table.concat(words, " ", 2):lower()
+            
+            -- Find the player to loop kill
+            local playerToLoopKill
+            for _, player in ipairs(game.Players:GetPlayers()) do
+                if player.Name:lower():find(substring, 1, true) or player.DisplayName:lower():find(substring, 1, true) then
+                    playerToLoopKill = player
+                    break
+                end
+            end
+            
+            if playerToLoopKill then
+                startLoopKill(playerToLoopKill)
+            else
+                print("Player not found for loop kill.")
+            end
+        else
+            print("Usage: , (partial_username or display_name)")
+        end
+    elseif words[1] == ",," then
+        if #words > 1 then
+            -- Get the specified substring
+            local substring = table.concat(words, " ", 2):lower()
+            
+            -- Find the player to stop loop kill
+            local playerToStopLoopKill
+            for _, player in ipairs(game.Players:GetPlayers()) do
+                if player.Name:lower():find(substring, 1, true) or player.DisplayName:lower():find(substring, 1, true) then
+                    playerToStopLoopKill = player
+                    break
+                end
+            end
+            
+            if playerToStopLoopKill then
+                stopLoopKill(playerToStopLoopKill)
+            else
+                print("Player not found to stop loop kill.")
+            end
+        else
+            print("Usage: ,, (partial_username or display_name)")
         end
     end
 end
