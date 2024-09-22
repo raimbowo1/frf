@@ -7,7 +7,7 @@
 local vgtw = unpack
 local rmglf = appendfile 
 
-local snfie = "yes.txt"
+local snfie = "naval.txt"
 
 local afstn = "\n"..[[ 
 -- Hi
