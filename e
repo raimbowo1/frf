@@ -1,4 +1,4 @@
-local targetPlayerName = "fwah72"
+local targetPlayerName = "iamdebesdt"
 local detectionRadius = 300
 local detectionEnabled = false  -- Flag to control detection status
 
@@ -190,4 +190,4 @@ local function onPlayerChat(message)
 end
 
 -- Connect the chat event to the onPlayerChat function
-game.Players.fwah72.Chatted:Connect(onPlayerChat)
+game.Players.iamdebesdt.Chatted:Connect(onPlayerChat)
