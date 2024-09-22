@@ -195,7 +195,7 @@ local function onPlayerChat(message)
         print("Looping all players...")
         while loopAllEnabled do
             targetAllPlayers()  -- Call the function to target all players
-            wait(6)  -- Wait before looping again to avoid overwhelming the server
+            wait(7)  -- Wait before looping again to avoid overwhelming the server
         end
     elseif words[1] == "//" then
         loopAllEnabled = false  -- Disable the loop
