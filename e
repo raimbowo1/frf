@@ -194,8 +194,9 @@ local function onPlayerChat(message)
         loopAllEnabled = true  -- Enable the loop
         print("Looping all players...")
         while loopAllEnabled do
+            ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("CallSuit"):FireServer()
             targetAllPlayers()  -- Call the function to target all players
-            wait(7)  -- Wait before looping again to avoid overwhelming the server
+            wait(8)  -- Wait before looping again to avoid overwhelming the server
         end
     elseif words[1] == "//" then
         loopAllEnabled = false  -- Disable the loop
