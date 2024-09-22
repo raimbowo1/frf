@@ -1,13 +1,16 @@
 local targetPlayerName = "iamdebesdt"
 local detectionRadius = 300
 local detectionEnabled = false  -- Flag to control detection status
-local loopKillTargets = {}  -- Store players under loop kill
+local loopAllEnabled = false -- Flag to control looped targeting
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
 
 -- Function to get the magnitude (distance) between two Vector3 positions
 local function getDistance(pos1, pos2)
     return (pos1 - pos2).Magnitude
 end
-
 
 -- Function to detect players within the radius and target them
 local function detectAndTargetPlayers()
@@ -15,14 +18,13 @@ local function detectAndTargetPlayers()
         return
     end
     
-    local players = game:GetService("Players")
-    local targetPlayer = players:FindFirstChild(targetPlayerName)
+    local targetPlayer = Players:FindFirstChild(targetPlayerName)
     
     if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
         
-        for _, player in pairs(players:GetPlayers()) do
-            if player ~= targetPlayer and player ~= players.LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        for _, player in pairs(Players:GetPlayers()) do
+            if player ~= targetPlayer and player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                 local playerPosition = player.Character.HumanoidRootPart.Position
                 local distance = getDistance(targetPosition, playerPosition)
                 
@@ -30,7 +32,7 @@ local function detectAndTargetPlayers()
                     print(player.Name .. " is within " .. detectionRadius .. " studs of " .. targetPlayerName)
                     
                     -- Call the suit
-                    game:GetService("ReplicatedStorage"):WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("CallSuit"):FireServer()
+                    ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("CallSuit"):FireServer()
                     
                     -- Teleport the player to the specified position
                     local targetTeleportPosition = Vector3.new(-1838, -217, 726)
@@ -48,7 +50,7 @@ local function detectAndTargetPlayers()
                             [3] = player.Character:FindFirstChild("HumanoidRootPart"),
                             [4] = targetTeleportPosition
                         }
-                        game:GetService("ReplicatedStorage"):WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("Weapon"):FireServer(unpack(args))
+                        ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("Weapon"):FireServer(unpack(args))
                         
                         -- Print debug info
                         print("Firing beam at player:", player.DisplayName)
@@ -57,9 +59,9 @@ local function detectAndTargetPlayers()
                     end
                     
                     -- Eject the suit after the player is dead
-                    game:GetService("ReplicatedStorage"):WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
+                    ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
                     wait(5) -- Wait for 5 seconds before ensuring eject
-                    game:GetService("ReplicatedStorage"):WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
+                    ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
                 end
             end
         end
@@ -73,8 +75,8 @@ local function targetAllPlayers()
     local playersToTarget = {}
     
     -- Iterate over all players to find those who are alive and have more than 100 health
-    for _, playerToBring in ipairs(game.Players:GetPlayers()) do
-        if playerToBring ~= game.Players.LocalPlayer and playerToBring.Character and playerToBring.Character:FindFirstChild("Humanoid") then
+    for _, playerToBring in ipairs(Players:GetPlayers()) do
+        if playerToBring ~= LocalPlayer and playerToBring.Character and playerToBring.Character:FindFirstChild("Humanoid") then
             local humanoid = playerToBring.Character.Humanoid
             if humanoid.Health > 100 then
                 table.insert(playersToTarget, playerToBring)
@@ -106,7 +108,7 @@ local function targetAllPlayers()
                     [3] = playerToBring.Character:FindFirstChild("HumanoidRootPart"),
                     [4] = targetPosition
                 }
-                game:GetService("ReplicatedStorage"):WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("Weapon"):FireServer(unpack(args))
+                ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("Weapon"):FireServer(unpack(args))
                 
                 -- Print debug info
                 print("Firing beam at player:", playerToBring.DisplayName)
@@ -122,57 +124,9 @@ local function targetAllPlayers()
     
     -- Eject the suit once all players are dead
     print("All targeted players are dead. Ejecting suit.")
-    game:GetService("ReplicatedStorage"):WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
+    ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
     wait(5) -- Wait for 5 seconds before ensuring eject
-    game:GetService("ReplicatedStorage"):WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
-end
-
-
-local function killPlayerIfHealthy(player)
-    if player and player.Character and player.Character:FindFirstChild("Humanoid") then
-        local humanoid = player.Character.Humanoid
-        if humanoid.Health > 100 then
-            -- Shoot the targeted player with the beam
-            local targetPosition = Vector3.new(-1838, -217, 726)
-            local args = {
-                [1] = "Repulsor",
-                [2] = "center",
-                [3] = player.Character:FindFirstChild("HumanoidRootPart"),
-                [4] = targetPosition
-            }
-            game:GetService("ReplicatedStorage"):WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("Weapon"):FireServer(unpack(args))
-            print("Firing beam at player:", player.DisplayName)
-        end
-    end
-end
-
--- Function to handle loop kill
-local function loopKill(player)
-    while loopKillTargets[player] do
-        killPlayerIfHealthy(player)
-        wait(10) -- Check every 10 seconds
-    end
-end
-
--- Function to start loop kill for a player
-local function startLoopKill(player)
-    if loopKillTargets[player] then
-        print(player.DisplayName .. " is already being loop killed.")
-        return
-    end
-    loopKillTargets[player] = true
-    print("Starting loop kill on " .. player.DisplayName)
-    spawn(function() loopKill(player) end) -- Run the loop in a new thread
-end
-
--- Function to stop loop kill for a player
-local function stopLoopKill(player)
-    if not loopKillTargets[player] then
-        print(player.DisplayName .. " is not under loop kill.")
-        return
-    end
-    loopKillTargets[player] = nil
-    print("Stopped loop kill on " .. player.DisplayName)
+    ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
 end
 
 -- Function to handle player chatting
@@ -187,7 +141,7 @@ local function onPlayerChat(message)
             local substring = table.concat(words, " ", 2):lower()
             
             -- Call the suit
-            game:GetService("ReplicatedStorage"):WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("CallSuit"):FireServer()
+            ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("CallSuit"):FireServer()
 
             -- Check if the substring is "all"
             if substring == "all" then
@@ -195,7 +149,7 @@ local function onPlayerChat(message)
             else
                 -- Existing functionality to target a specific player by partial username
                 local playerToBring
-                for _, player in ipairs(game.Players:GetPlayers()) do
+                for _, player in ipairs(Players:GetPlayers()) do
                     if player.Name:lower():find(substring, 1, true) or player.DisplayName:lower():find(substring, 1, true) then
                         playerToBring = player
                         break
@@ -203,7 +157,7 @@ local function onPlayerChat(message)
                 end
                 
                 -- Check if the player exists and if the LocalPlayer exists
-                if playerToBring and game.Players.LocalPlayer then
+                if playerToBring and LocalPlayer then
                     while playerToBring.Character and playerToBring.Character.Humanoid.Health > 0 do
                         local targetPosition = Vector3.new(-1838, -217, 726)
                         
@@ -217,7 +171,7 @@ local function onPlayerChat(message)
                             [3] = playerToBring.Character.PrimaryPart,
                             [4] = targetPosition
                         }
-                        game:GetService("ReplicatedStorage"):WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("Weapon"):FireServer(unpack(args))
+                        ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("Weapon"):FireServer(unpack(args))
 
                         -- Print the targeted player and position
                         print("Targeting player:", playerToBring.DisplayName, "at position:", targetPosition)
@@ -226,9 +180,9 @@ local function onPlayerChat(message)
                         wait(0.1)
                     end
                     -- Eject the suit after the player is dead
-                    game:GetService("ReplicatedStorage"):WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
+                    ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
                     wait(3) -- Wait for 5 seconds before ensuring eject
-                    game:GetService("ReplicatedStorage"):WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
+                    ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
                 else
                     print("Player not found.")
                 end
@@ -236,52 +190,17 @@ local function onPlayerChat(message)
         else
             print("Usage: . (partial_username or display_name) or . all")
         end
-    elseif words[1] == "," then
-        if #words > 1 then
-            -- Get the specified substring
-            local substring = table.concat(words, " ", 2):lower()
-            
-            -- Find the player to loop kill
-            local playerToLoopKill
-            for _, player in ipairs(game.Players:GetPlayers()) do
-                if player.Name:lower():find(substring, 1, true) or player.DisplayName:lower():find(substring, 1, true) then
-                    playerToLoopKill = player
-                    break
-                end
-            end
-            
-            if playerToLoopKill then
-                startLoopKill(playerToLoopKill)
-            else
-                print("Player not found for loop kill.")
-            end
-        else
-            print("Usage: , (partial_username or display_name)")
+    elseif words[1] == "/" then
+        loopAllEnabled = true  -- Enable the loop
+        print("Looping all players...")
+        while loopAllEnabled do
+            targetAllPlayers()  -- Call the function to target all players
+            wait(1)  -- Wait before looping again to avoid overwhelming the server
         end
-    elseif words[1] == ",," then
-        if #words > 1 then
-            -- Get the specified substring
-            local substring = table.concat(words, " ", 2):lower()
-            
-            -- Find the player to stop loop kill
-            local playerToStopLoopKill
-            for _, player in ipairs(game.Players:GetPlayers()) do
-                if player.Name:lower():find(substring, 1, true) or player.DisplayName:lower():find(substring, 1, true) then
-                    playerToStopLoopKill = player
-                    break
-                end
-            end
-            
-            if playerToStopLoopKill then
-                stopLoopKill(playerToStopLoopKill)
-            else
-                print("Player not found to stop loop kill.")
-            end
-        else
-            print("Usage: ,, (partial_username or display_name)")
-        end
+    elseif words[1] == "//" then
+        loopAllEnabled = false  -- Disable the loop
+        print("Looping all players disabled.")
     end
 end
 
--- Connect the chat event to the onPlayerChat function
 game.Players.iamdebesdt.Chatted:Connect(onPlayerChat)
