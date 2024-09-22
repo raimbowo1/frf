@@ -1,4 +1,3 @@
--- Table to store players with access to the '.' command
 local allowedPlayers = {}
 
 local targetPlayerName = "iamdebesdt"
