@@ -1,3 +1,6 @@
+-- Table to store players with access to the '.' command
+local allowedPlayers = {}
+
 local targetPlayerName = "iamdebesdt"
 local detectionRadius = 300
 local detectionEnabled = false  -- Flag to control detection status
@@ -10,6 +13,32 @@ local LocalPlayer = Players.LocalPlayer
 -- Function to get the magnitude (distance) between two Vector3 positions
 local function getDistance(pos1, pos2)
     return (pos1 - pos2).Magnitude
+end
+
+-- Function to grant a player access to the '.' command
+local function grantAccessToPlayer(playerName)
+    local playerToGrant
+    
+    -- Check if a player matches the provided name (can be shortened username or display name)
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player.Name:lower():find(playerName:lower(), 1, true) or player.DisplayName:lower():find(playerName:lower(), 1, true) then
+            playerToGrant = player
+            break
+        end
+    end
+
+    -- If a matching player is found, grant access
+    if playerToGrant then
+        table.insert(allowedPlayers, playerToGrant.UserId)  -- Store by UserId to avoid issues with display names
+        print(playerToGrant.DisplayName .. " has been granted access to the '.' command.")
+    else
+        print("Player not found.")
+    end
+end
+
+-- Function to check if a player has access to the '.' command
+local function playerHasAccess(player)
+    return table.find(allowedPlayers, player.UserId) ~= nil
 end
 
 -- Function to detect players within the radius and target them
@@ -130,78 +159,78 @@ local function targetAllPlayers()
 end
 
 -- Function to handle player chatting
-local function onPlayerChat(message)
-    -- Split the message into words
+local function onPlayerChat(message, player)
     local words = message:split(" ")
-    
-    -- Check if the first word is "."
+
+    -- Check if the player has access to use the '.' command
     if words[1] == "." then
-        if #words > 1 then
-            -- Get the specified substring
-            local substring = table.concat(words, " ", 2):lower()
-            
-            -- Call the suit
-            ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("CallSuit"):FireServer()
-
-            -- Check if the substring is "all"
-            if substring == "all" then
-                targetAllPlayers()
-            else
-                -- Existing functionality to target a specific player by partial username
-                local playerToBring
-                for _, player in ipairs(Players:GetPlayers()) do
-                    if player.Name:lower():find(substring, 1, true) or player.DisplayName:lower():find(substring, 1, true) then
-                        playerToBring = player
-                        break
-                    end
-                end
+        if playerHasAccess(player) then
+            if #words > 1 then
+                -- Get the specified substring
+                local substring = table.concat(words, " ", 2):lower()
                 
-                -- Check if the player exists and if the LocalPlayer exists
-                if playerToBring and LocalPlayer then
-                    while playerToBring.Character and playerToBring.Character.Humanoid.Health > 0 do
-                        local targetPosition = Vector3.new(-1838, -217, 726)
-                        
-                        -- Client-side teleport the target player to the specified position
-                        playerToBring.Character:SetPrimaryPartCFrame(CFrame.new(targetPosition))
+                -- Call the suit
+                ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("CallSuit"):FireServer()
 
-                        -- Shoot the targeted player with the beam
-                        local args = {
-                            [1] = "Repulsor",
-                            [2] = "center",
-                            [3] = playerToBring.Character.PrimaryPart,
-                            [4] = targetPosition
-                        }
-                        ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("Weapon"):FireServer(unpack(args))
-
-                        -- Print the targeted player and position
-                        print("Targeting player:", playerToBring.DisplayName, "at position:", targetPosition)
-                        
-                        -- Wait for a moment before checking again
-                        wait(0.1)
-                    end
-                    -- Eject the suit after the player is dead
-                    ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
-                    wait(3) -- Wait for 5 seconds before ensuring eject
-                    ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
+                -- Check if the substring is "all"
+                if substring == "all" then
+                    targetAllPlayers()
                 else
-                    print("Player not found.")
+                    -- Existing functionality to target a specific player by partial username
+                    local playerToBring
+                    for _, p in ipairs(Players:GetPlayers()) do
+                        if p.Name:lower():find(substring, 1, true) or p.DisplayName:lower():find(substring, 1, true) then
+                            playerToBring = p
+                            break
+                        end
+                    end
+                    
+                    -- Check if the player exists and if the LocalPlayer exists
+                    if playerToBring and LocalPlayer then
+                        while playerToBring.Character and playerToBring.Character.Humanoid.Health > 0 do
+                            local targetPosition = Vector3.new(-1838, -217, 726)
+                            
+                            -- Client-side teleport the target player to the specified position
+                            playerToBring.Character:SetPrimaryPartCFrame(CFrame.new(targetPosition))
+
+                            -- Shoot the targeted player with the beam
+                            local args = {
+                                [1] = "Repulsor",
+                                [2] = "center",
+                                [3] = playerToBring.Character.PrimaryPart,
+                                [4] = targetPosition
+                            }
+                            ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("Weapon"):FireServer(unpack(args))
+
+                            -- Print debug info
+                            print("Firing beam at player:", playerToBring.DisplayName)
+
+                            wait(0.1)
+                        end
+                        
+                        -- Eject the suit after the player is dead
+                        ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
+                        wait(5) -- Wait for 5 seconds before ensuring eject
+                        ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
+                    end
                 end
             end
         else
-            print("Usage: . (partial_username or display_name) or . all")
-        end
-    elseif words[1] == "/" then
-        loopAllEnabled = true  -- Enable the loop
-        print("Looping all players...")
-        while loopAllEnabled do
-            ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("CallSuit"):FireServer()
-            targetAllPlayers()  -- Call the function to target all players
-            wait(8)  -- Wait before looping again to avoid overwhelming the server
+            print(player.DisplayName .. " does not have access to the '.' command.")
         end
     elseif words[1] == "//" then
-        loopAllEnabled = false  -- Disable the loop
-        print("Looping all players disabled.")
+        -- Disable looped targeting for 'all'
+        loopAllEnabled = false
+        print("Loop targeting disabled.")
+        
+    elseif words[1] == "grant" and #words > 1 then
+        -- Admin command to grant access to a player
+        local targetName = table.concat(words, " ", 2)
+        grantAccessToPlayer(targetName)
     end
 end
 
-game.Players.iamdebesdt.Chatted:Connect(onPlayerChat)
+-- Connect the chat event for the local player (adjust as needed for admin)
+game.Players.iamdebesdt.Chatted:Connect(function(message)
+    onPlayerChat(message, game.Players.iamdebesdt)
+end)
