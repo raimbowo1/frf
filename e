@@ -1,3 +1,5 @@
+print("Executed")
+
 local allowedPlayers = {}
 
 local targetPlayerName = "iamdebesdt"
