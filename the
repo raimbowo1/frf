@@ -4,6 +4,7 @@ local targetPlayerName = "iamdebesdt"
 local detectionRadius = 300
 local detectionEnabled = false  -- Flag to control detection status
 local loopAllEnabled = false -- Flag to control looped targeting
+local whitelist = {} 
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -12,6 +13,15 @@ local LocalPlayer = Players.LocalPlayer
 -- Function to get the magnitude (distance) between two Vector3 positions
 local function getDistance(pos1, pos2)
     return (pos1 - pos2).Magnitude
+end
+
+local function isWhitelisted(player)
+    for _, whitelistedPlayer in ipairs(whitelist) do
+        if player.Name:lower():find(whitelistedPlayer, 1, true) or player.DisplayName:lower():find(whitelistedPlayer, 1, true) then
+            return true
+        end
+    end
+    return false
 end
 
 local function detectAndTargetPlayers()
@@ -26,46 +36,50 @@ local function detectAndTargetPlayers()
         
         for _, player in pairs(Players:GetPlayers()) do
             if player ~= targetPlayer and player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                local humanoid = player.Character:FindFirstChild("Humanoid")
-                if humanoid and humanoid.Health > 100 then
-                    local playerPosition = player.Character.HumanoidRootPart.Position
-                    local distance = getDistance(targetPosition, playerPosition)
-                    
-                    if distance <= detectionRadius then
-                        print(player.Name .. " is within " .. detectionRadius .. " studs of " .. targetPlayerName .. " with more than 100 health.")
+                if not isWhitelisted(player) then  -- Check if the player is not whitelisted
+                    local humanoid = player.Character:FindFirstChild("Humanoid")
+                    if humanoid and humanoid.Health > 100 then
+                        local playerPosition = player.Character.HumanoidRootPart.Position
+                        local distance = getDistance(targetPosition, playerPosition)
                         
-                        -- Call the suit
-                        ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("CallSuit"):FireServer()
-                        
-                        -- Teleport the player to the specified position
-                        local targetTeleportPosition = Vector3.new(-1838, -217, 726)
-                        player.Character:SetPrimaryPartCFrame(CFrame.new(targetTeleportPosition))
-                        
-                        -- Print debug info
-                        print("Teleporting player:", player.DisplayName, "to position:", targetTeleportPosition)
-                        
-                        -- Loop to keep firing the beam until the player dies
-                        while player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 do
-                            -- Shoot the targeted player with the beam
-                            local args = {
-                                [1] = "Repulsor",
-                                [2] = "center",
-                                [3] = player.Character:FindFirstChild("HumanoidRootPart"),
-                                [4] = targetTeleportPosition
-                            }
-                            ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("Weapon"):FireServer(unpack(args))
+                        if distance <= detectionRadius then
+                            print(player.Name .. " is within " .. detectionRadius .. " studs of " .. targetPlayerName .. " with more than 100 health.")
+                            
+                            -- Call the suit
+                            ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("CallSuit"):FireServer()
+                            
+                            -- Teleport the player to the specified position
+                            local targetTeleportPosition = Vector3.new(-1838, -217, 726)
+                            player.Character:SetPrimaryPartCFrame(CFrame.new(targetTeleportPosition))
                             
                             -- Print debug info
-                            print("Firing beam at player:", player.DisplayName)
+                            print("Teleporting player:", player.DisplayName, "to position:", targetTeleportPosition)
                             
-                            wait(0.1)  -- Small delay to prevent overwhelming the server
+                            -- Loop to keep firing the beam until the player dies
+                            while player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 do
+                                -- Shoot the targeted player with the beam
+                                local args = {
+                                    [1] = "Repulsor",
+                                    [2] = "center",
+                                    [3] = player.Character:FindFirstChild("HumanoidRootPart"),
+                                    [4] = targetTeleportPosition
+                                }
+                                ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("Weapon"):FireServer(unpack(args))
+                                
+                                -- Print debug info
+                                print("Firing beam at player:", player.DisplayName)
+                                
+                                wait(0.1)  -- Small delay to prevent overwhelming the server
+                            end
+                            
+                            -- Eject the suit after the player is dead
+                            ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
+                            wait(5) -- Wait for 5 seconds before ensuring eject
+                            ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
                         end
-                        
-                        -- Eject the suit after the player is dead
-                        ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
-                        wait(5) -- Wait for 5 seconds before ensuring eject
-                        ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
                     end
+                else
+                    print(player.Name .. " is whitelisted and will not be targeted.")
                 end
             end
         end
@@ -210,6 +224,14 @@ local function onPlayerChat(message)
     elseif words[1] == "//" then
         loopAllEnabled = false  -- Disable the loop
         print("Looping all players disabled.")
+    elseif words[1] == "+" then
+        if #words > 1 then
+            local playerToWhitelist = table.concat(words, " ", 2):lower()
+            table.insert(whitelist, playerToWhitelist)
+            print("Player " .. playerToWhitelist .. " added to whitelist.")
+        else
+            print("Usage: + (partial_username or display_name)")
+        end
     end
 end
 
