@@ -1,4 +1,4 @@
-print("executed")
+print("new ver")
 
 local targetPlayerName = "iamdebesdt"
 local detectionRadius = 300
@@ -19,13 +19,14 @@ local function detectAndTargetPlayers()
         return
     end
     
-    local targetPlayer = Players:FindFirstChild(targetPlayerName)
+    local players = game:GetService("Players")
+    local targetPlayer = players:FindFirstChild(targetPlayerName)
     
     if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
         
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= targetPlayer and player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        for _, player in pairs(players:GetPlayers()) do
+            if player ~= targetPlayer and player ~= players.LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                 local playerPosition = player.Character.HumanoidRootPart.Position
                 local distance = getDistance(targetPosition, playerPosition)
                 
@@ -33,7 +34,7 @@ local function detectAndTargetPlayers()
                     print(player.Name .. " is within " .. detectionRadius .. " studs of " .. targetPlayerName)
                     
                     -- Call the suit
-                    ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("CallSuit"):FireServer()
+                    game:GetService("ReplicatedStorage"):WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("CallSuit"):FireServer()
                     
                     -- Teleport the player to the specified position
                     local targetTeleportPosition = Vector3.new(-1838, -217, 726)
@@ -51,7 +52,7 @@ local function detectAndTargetPlayers()
                             [3] = player.Character:FindFirstChild("HumanoidRootPart"),
                             [4] = targetTeleportPosition
                         }
-                        ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("Weapon"):FireServer(unpack(args))
+                        game:GetService("ReplicatedStorage"):WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("Weapon"):FireServer(unpack(args))
                         
                         -- Print debug info
                         print("Firing beam at player:", player.DisplayName)
@@ -60,9 +61,9 @@ local function detectAndTargetPlayers()
                     end
                     
                     -- Eject the suit after the player is dead
-                    ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
+                    game:GetService("ReplicatedStorage"):WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
                     wait(5) -- Wait for 5 seconds before ensuring eject
-                    ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
+                    game:GetService("ReplicatedStorage"):WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
                 end
             end
         end
@@ -70,7 +71,6 @@ local function detectAndTargetPlayers()
         print("Target player not found or does not have a character.")
     end
 end
-
 
 -- Function to target all players with health > 100 and eject suit once all are dead
 local function targetAllPlayers()
