@@ -1,4 +1,4 @@
-print("new ver")
+print("new ve2r")
 
 local targetPlayerName = "iamdebesdt"
 local detectionRadius = 300
