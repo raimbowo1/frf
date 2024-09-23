@@ -216,3 +216,5 @@ local function onPlayerChat(message)
 end
 
 game.Players.iamdebesdt.Chatted:Connect(onPlayerChat)
+
+print("succesfull")
