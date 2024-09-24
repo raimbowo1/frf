@@ -341,4 +341,19 @@ game.Players.iamdebesdt.Chatted:Connect(onPlayerChat)
 
 spawn(checkProximity)
 
-print("succesfull")
+print([[
+Successful! 
+Commands available:
+
+1. `. (target)` – Targets a specific player for kill.
+2. `. all` – Targets all players with health above 100.
+3. `-` – Enable kill aura within 300 studs; kills anyone with more than 100 health.
+4. `--` – Disable the kill aura.
+5. `/` – Loop kill everyone with health above 100.
+6. `//` – Stop the loop kill.
+7. `+ (target)` – Whitelist players from kill aura, kill all, and loop kill.
+8. `++ (target)` – Unwhitelist players.
+9. `, (target)` – Grant a player permission to use the `. command`.
+10. `,, (target)` – Remove a player's permission.
+
+]])
