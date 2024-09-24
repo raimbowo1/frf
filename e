@@ -231,7 +231,7 @@ local function onPlayerChat(message)
         else
             print("Usage: + (partial_username or display_name)")
         end
-    elseif words[1] == "-" then
+    elseif words[1] == "++" then
         if #words > 1 then
             local playerToRemove = table.concat(words, " ", 2):lower()
             if removeFromWhitelist(playerToRemove) then
@@ -242,6 +242,9 @@ local function onPlayerChat(message)
         else
             print("Usage: - (partial_username or display_name)")
         end
+    elseif words[1] == "-" then
+        detectionEnabled = true  -- Enable detection
+        print("Detection enabled.")
     elseif words[1] == "--" then
         detectionEnabled = false  -- Disable detection
         print("Detection disabled.")
