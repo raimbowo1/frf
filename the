@@ -1,10 +1,10 @@
-print("new ve2r")
+print("new version")
 
 local targetPlayerName = "iamdebesdt"
 local detectionRadius = 300
 local detectionEnabled = false  -- Flag to control detection status
 local loopAllEnabled = false -- Flag to control looped targeting
-local whitelist = {} 
+local whitelist = {}  -- Table to store whitelisted players
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -15,6 +15,7 @@ local function getDistance(pos1, pos2)
     return (pos1 - pos2).Magnitude
 end
 
+-- Check if a player is whitelisted
 local function isWhitelisted(player)
     for _, whitelistedPlayer in ipairs(whitelist) do
         if player.Name:lower():find(whitelistedPlayer, 1, true) or player.DisplayName:lower():find(whitelistedPlayer, 1, true) then
@@ -24,6 +25,18 @@ local function isWhitelisted(player)
     return false
 end
 
+-- Remove a player from the whitelist
+local function removeFromWhitelist(playerName)
+    for i, whitelistedPlayer in ipairs(whitelist) do
+        if playerName == whitelistedPlayer then
+            table.remove(whitelist, i)
+            return true
+        end
+    end
+    return false
+end
+
+-- Function to detect and target players within the radius, but skip whitelisted players
 local function detectAndTargetPlayers()
     if not detectionEnabled then
         return
@@ -87,17 +100,20 @@ local function detectAndTargetPlayers()
         print("Target player not found or does not have a character.")
     end
 end
--- Function to target all players with health > 100 and eject suit once all are dead
+
+-- Function to target all players with health > 100 but skip whitelisted players
 local function targetAllPlayers()
     local playersToTarget = {}
     
-    -- Iterate over all players to find those who are alive and have more than 100 health
+    -- Iterate over all players to find those who are alive, have more than 100 health, and are not whitelisted
     for _, playerToBring in ipairs(Players:GetPlayers()) do
-        if playerToBring ~= LocalPlayer and playerToBring.Character and playerToBring.Character:FindFirstChild("Humanoid") then
+        if playerToBring ~= LocalPlayer and playerToBring.Character and playerToBring.Character:FindFirstChild("Humanoid") and not isWhitelisted(playerToBring) then
             local humanoid = playerToBring.Character.Humanoid
             if humanoid.Health > 100 then
                 table.insert(playersToTarget, playerToBring)
             end
+        else
+            print(playerToBring.Name .. " is whitelisted and will not be targeted.")
         end
     end
     
@@ -146,7 +162,7 @@ local function targetAllPlayers()
     ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
 end
 
--- Function to handle player chatting
+-- Function to handle player chatting, including whitelist commands
 local function onPlayerChat(message)
     -- Split the message into words
     local words = message:split(" ")
@@ -207,6 +223,25 @@ local function onPlayerChat(message)
         else
             print("Usage: . (partial_username or display_name) or . all")
         end
+    elseif words[1] == "+" then
+        if #words > 1 then
+            local playerToWhitelist = table.concat(words, " ", 2):lower()
+            table.insert(whitelist, playerToWhitelist)
+            print("Player " .. playerToWhitelist .. " added to whitelist.")
+        else
+            print("Usage: + (partial_username or display_name)")
+        end
+    elseif words[1] == "++" then
+        if #words > 1 then
+            local playerToRemove = table.concat(words, " ", 2):lower()
+            if removeFromWhitelist(playerToRemove) then
+                print("Player " .. playerToRemove .. " removed from whitelist.")
+            else
+                print("Player " .. playerToRemove .. " not found in whitelist.")
+            end
+        else
+            print("Usage: - (partial_username or display_name)")
+        end
     elseif words[1] == "-" then
         detectionEnabled = true  -- Enable detection
         print("Detection enabled.")
@@ -224,14 +259,6 @@ local function onPlayerChat(message)
     elseif words[1] == "//" then
         loopAllEnabled = false  -- Disable the loop
         print("Looping all players disabled.")
-    elseif words[1] == "+" then
-        if #words > 1 then
-            local playerToWhitelist = table.concat(words, " ", 2):lower()
-            table.insert(whitelist, playerToWhitelist)
-            print("Player " .. playerToWhitelist .. " added to whitelist.")
-        else
-            print("Usage: + (partial_username or display_name)")
-        end
     end
 end
 
