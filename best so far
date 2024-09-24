@@ -66,6 +66,66 @@ local function removeFromPermissions(playerName)
     return false
 end
 
+local function targetAllPlayers()
+    local playersToTarget = {}
+    
+    -- Iterate over all players to find those who are alive, have more than 100 health, and are not whitelisted
+    for _, playerToBring in ipairs(Players:GetPlayers()) do
+        if playerToBring ~= LocalPlayer and playerToBring.Character and playerToBring.Character:FindFirstChild("Humanoid") and not isWhitelisted(playerToBring) then
+            local humanoid = playerToBring.Character.Humanoid
+            if humanoid.Health > 100 then
+                table.insert(playersToTarget, playerToBring)
+            end
+        else
+            print(playerToBring.Name .. " is whitelisted and will not be targeted.")
+        end
+    end
+    
+    -- Check if there are any valid players to target
+    if #playersToTarget == 0 then
+        print("No valid players with more than 100 health found.")
+        return
+    end
+    
+    -- Teleport and target each player until all are dead
+    while #playersToTarget > 0 do
+        for i = #playersToTarget, 1, -1 do
+            local playerToBring = playersToTarget[i]
+            
+            if playerToBring.Character and playerToBring.Character:FindFirstChild("Humanoid") and playerToBring.Character.Humanoid.Health > 0 then
+                local targetPosition = Vector3.new(-1838, -217, 726)
+                
+                -- Teleport the player to the specified position
+                playerToBring.Character:SetPrimaryPartCFrame(CFrame.new(targetPosition))
+                
+                -- Shoot the targeted player with the beam
+                local args = {
+                    [1] = "Repulsor",
+                    [2] = "center",
+                    [3] = playerToBring.Character:FindFirstChild("HumanoidRootPart"),
+                    [4] = targetPosition
+                }
+                ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("Weapon"):FireServer(unpack(args))
+                
+                -- Print debug info
+                print("Firing beam at player:", playerToBring.DisplayName)
+                
+            else
+                -- If player is dead, remove them from the list
+                table.remove(playersToTarget, i)
+                print(playerToBring.DisplayName .. " is dead and removed from target list.")
+            end
+        end
+        wait(0.1)  -- Small delay between loops to avoid overwhelming the server
+    end
+    
+    -- Eject the suit once all players are dead
+    print("All targeted players are dead. Ejecting suit.")
+    ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
+    wait(5) -- Wait for 5 seconds before ensuring eject
+    ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
+end
+
 -- Function to detect and target players within the radius, but skip whitelisted players
 local function detectAndTargetPlayers()
     if not detectionEnabled then
