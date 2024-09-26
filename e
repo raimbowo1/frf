@@ -382,7 +382,7 @@ local function onPlayerChat(message)
     elseif words[1] == "//" then
         loopAllEnabled = false  -- Disable the loop
         print("Looping all players disabled.")
-    elseif words[1] == ">" then
+    elseif words[1] == ".." then
         if #words > 1 then
             local targetPlayer = table.concat(words, " ", 2):lower()
             targetedPlayers[targetPlayer] = true -- Enable tracking
@@ -391,7 +391,7 @@ local function onPlayerChat(message)
         else
             print("Usage: > (partial_username or display_name)")
         end
-    elseif words[1] == ">>" then
+    elseif words[1] == "..." then
         if #words > 1 then
             local targetPlayer = table.concat(words, " ", 2):lower()
             disableTrackingPlayer(targetPlayer) -- Disable tracking
