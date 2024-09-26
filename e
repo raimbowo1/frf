@@ -381,10 +381,10 @@ local function onPlayerChat(message)
             targetAllPlayers()  -- Call the function to target all players
             wait(8)  -- Wait before looping again to avoid overwhelming the server
         end
-    elseif words[1] == "//" then
+    elseif words[1] == ">>" then
         loopAllEnabled = false  -- Disable the loop
         print("Looping all players disabled.")
-    elseif words[1] == "\\" then
+    elseif words[1] == ">" then
         -- Disable specific target within 300 studs
         specificTarget = nil
         print("Specific target aura disabled.")
@@ -404,7 +404,7 @@ local function onPlayerChat(message)
             end
         end
     else
-        print("Usage: \\ (partial_username or display_name)")
+        print("Usage: > (partial_username or display_name)")
     end
 end
 
