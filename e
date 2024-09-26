@@ -389,7 +389,7 @@ local function onPlayerChat(message)
         specificTarget = nil
         print("Specific target aura disabled.")
         
-    elseif words[1] == "\\" then
+    elseif words[1] == "\" then
         -- Check if a valid player to target is mentioned
         if #words > 1 then
             local targetPlayerName = table.concat(words, " ", 2):lower()
