@@ -1,4 +1,4 @@
-print("new")
+print("new version2")
 
 local targetPlayerName = "iamdebesdt"
 local detectionRadius = 300
@@ -7,7 +7,9 @@ local loopAllEnabled = false -- Flag to control looped targeting
 local whitelist = {}  -- Table to store whitelisted players
 local permissions = {}  -- Table to store players with permission to use the "." command
 local permissionConnections = {}  -- Table to store connections to `Chatted` event for players with permission
-local specificTarget = nil 
+local targetedPlayers = {} -- Store players being tracked for targeting
+
+
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -128,67 +130,63 @@ local function targetAllPlayers()
 end
 
 
-
-
-local function targetSpecificPlayerWithinRadius()
-    if not specificTarget then
-        return  -- If no target is set, don't run the detection
-    end
+local function trackAndTargetPlayer(targetPlayerName)
+    local targetPlayer = Players:FindFirstChild(targetPlayerName)
     
-    local targetPlayer = Players:FindFirstChild(specificTarget)
-    
+    -- Check if the target player exists
     if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
-        
-        for _, player in pairs(Players:GetPlayers()) do
-            if player ~= targetPlayer and player ~= LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                local humanoid = player.Character:FindFirstChild("Humanoid")
-                if humanoid and humanoid.Health > 100 then
+        while true do
+            if not targetedPlayers[targetPlayerName] then
+                -- Stop tracking if player was disabled
+                return
+            end
+
+            local targetPosition = targetPlayer.Character.HumanoidRootPart.Position
+
+            -- Loop through players to find the local player
+            for _, player in pairs(Players:GetPlayers()) do
+                if player == LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                     local playerPosition = player.Character.HumanoidRootPart.Position
                     local distance = getDistance(targetPosition, playerPosition)
-                    
+
+                    -- Check if within 300 studs
                     if distance <= 300 then
-                        print(player.Name .. " is within 300 studs of " .. targetPlayer.Name)
-                        
+                        print(player.Name .. " is within 300 studs of " .. targetPlayerName .. ", targeting now!")
+
                         -- Call the suit
                         ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("CallSuit"):FireServer()
-                        
-                        -- Teleport the player to the specified position
+
+                        -- Teleport the target player
                         local targetTeleportPosition = Vector3.new(-1838, -217, 726)
-                        player.Character:SetPrimaryPartCFrame(CFrame.new(targetTeleportPosition))
-                        
+                        targetPlayer.Character:SetPrimaryPartCFrame(CFrame.new(targetTeleportPosition))
+
+                        -- Shoot the targeted player with the beam
+                        local args = {
+                            [1] = "Repulsor",
+                            [2] = "center",
+                            [3] = targetPlayer.Character:FindFirstChild("HumanoidRootPart"),
+                            [4] = targetTeleportPosition
+                        }
+                        ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("Weapon"):FireServer(unpack(args))
+
                         -- Print debug info
-                        print("Teleporting player:", player.DisplayName, "to position:", targetTeleportPosition)
-                        
-                        -- Loop to keep firing the beam until the player dies
-                        while player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 do
-                            -- Shoot the targeted player with the beam
-                            local args = {
-                                [1] = "Repulsor",
-                                [2] = "center",
-                                [3] = player.Character:FindFirstChild("HumanoidRootPart"),
-                                [4] = targetTeleportPosition
-                            }
-                            ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("Weapon"):FireServer(unpack(args))
-                            
-                            -- Print debug info
-                            print("Firing beam at player:", player.DisplayName)
-                            
-                            wait(0.1)  -- Small delay to prevent overwhelming the server
-                        end
-                        
-                        -- Eject the suit after the player is dead
-                        ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
-                        wait(5) -- Wait for 5 seconds before ensuring eject
-                        ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
+                        print("Firing beam at player:", targetPlayer.DisplayName)
                     end
                 end
             end
+            wait(0.1)  -- Small delay to prevent overwhelming the server
         end
     else
-        print("Specific target player not found or does not have a character.")
+        print("Player not found or not spawned.")
     end
 end
+
+-- Disable tracking for a player
+local function disableTrackingPlayer(targetPlayerName)
+    targetedPlayers[targetPlayerName] = nil -- Remove from tracking table
+    print("Tracking disabled for player: " .. targetPlayerName)
+end
+
 
 -- Function to detect and target players within the radius, but skip whitelisted players
 local function detectAndTargetPlayers()
@@ -384,41 +382,24 @@ local function onPlayerChat(message)
     elseif words[1] == "//" then
         loopAllEnabled = false  -- Disable the loop
         print("Looping all players disabled.")
+    elseif words[1] == ">" then
+        if #words > 1 then
+            local targetPlayer = table.concat(words, " ", 2):lower()
+            targetedPlayers[targetPlayer] = true -- Enable tracking
+            print("Targeting player when within 300 studs: " .. targetPlayer)
+            trackAndTargetPlayer(targetPlayer) -- Start tracking
+        else
+            print("Usage: > (partial_username or display_name)")
+        end
     elseif words[1] == ">>" then
-        -- Disable specific target within 300 studs
-        specificTarget = nil
-        print("Specific target aura disabled.")
-        
-elseif words[1] == ">" then
-    -- Check if a valid player to target is mentioned
-    if #words > 1 then
-        local targetPlayerName = table.concat(words, " ", 2):lower()
-        local foundPlayer = false  -- Flag to track if we found a matching player
-
-        -- Search for the player with the partial name
-        for _, player in ipairs(Players:GetPlayers()) do
-            local playerNameLower = player.Name:lower()
-            local displayNameLower = player.DisplayName:lower()
-
-            if playerNameLower:find(targetPlayerName, 1, true) or displayNameLower:find(targetPlayerName, 1, true) then
-                specificTarget = player.Name  -- Set the specific target
-                print("Now targeting player: " .. player.Name .. " if they come within 300 studs.")
-                foundPlayer = true  -- Player match found
-                break
-            end
+        if #words > 1 then
+            local targetPlayer = table.concat(words, " ", 2):lower()
+            disableTrackingPlayer(targetPlayer) -- Disable tracking
+        else
+            print("Usage: >> (partial_username or display_name)")
         end
-        
-        -- If no player was found, print the usage message
-        if not foundPlayer then
-            print("Player not found. Usage: > (partial_username or display_name)")
-        end
-    else
-        print("Usage: > (partial_username or display_name)")
     end
-  end
 end
-
-
 
 local function checkProximity()
     while true do
@@ -454,4 +435,3 @@ Commands available:
 10. `,, (target)` – Remove a player's permission.
 
 ]])
-
