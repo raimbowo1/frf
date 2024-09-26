@@ -1,4 +1,4 @@
-print("new version")
+print("new")
 
 local targetPlayerName = "iamdebesdt"
 local detectionRadius = 300
