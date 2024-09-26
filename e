@@ -389,24 +389,35 @@ local function onPlayerChat(message)
         specificTarget = nil
         print("Specific target aura disabled.")
         
-    elseif words[1] == ">" then
-        -- Check if a valid player to target is mentioned
-        if #words > 1 then
-            local targetPlayerName = table.concat(words, " ", 2):lower()
-        
-            -- Search for the player with the partial name
-            for _, player in ipairs(Players:GetPlayers()) do
-                if player.Name:lower():find(targetPlayerName, 1, true) or player.DisplayName:lower():find(targetPlayerName, 1, true) then
-                    specificTarget = player.Name  -- Set the specific target
-                    print("Now targeting player: " .. player.Name .. " if they come within 300 studs.")
+elseif words[1] == ">" then
+    -- Check if a valid player to target is mentioned
+    if #words > 1 then
+        local targetPlayerName = table.concat(words, " ", 2):lower()
+        local foundPlayer = false  -- Flag to track if we found a matching player
+
+        -- Search for the player with the partial name
+        for _, player in ipairs(Players:GetPlayers()) do
+            local playerNameLower = player.Name:lower()
+            local displayNameLower = player.DisplayName:lower()
+
+            if playerNameLower:find(targetPlayerName, 1, true) or displayNameLower:find(targetPlayerName, 1, true) then
+                specificTarget = player.Name  -- Set the specific target
+                print("Now targeting player: " .. player.Name .. " if they come within 300 studs.")
+                foundPlayer = true  -- Player match found
                 break
-                end
             end
+        end
+        
+        -- If no player was found, print the usage message
+        if not foundPlayer then
+            print("Player not found. Usage: > (partial_username or display_name)")
         end
     else
         print("Usage: > (partial_username or display_name)")
     end
+  end
 end
+
 
 
 local function checkProximity()
