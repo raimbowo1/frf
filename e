@@ -1,4 +1,4 @@
-print("new version3")
+print("new ")
 
 local targetPlayerName = "iamdebesdt"
 local detectionRadius = 300
@@ -230,32 +230,47 @@ local function detectAndTargetPlayer(player)
             local playerPosition = player.Character.HumanoidRootPart.Position
             local distance = getDistance(targetPlayerPosition, playerPosition)
             
-            if distance <= detectionRadius and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 then
-                print(player.Name .. " is within " .. detectionRadius .. " studs of " .. targetPlayerName .. ".")
+            -- Only target if the player is within range and has more than 100 health
+            if distance <= detectionRadius and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 100 then
+                print(player.Name .. " is within " .. detectionRadius .. " studs of " .. targetPlayerName .. " and has more than 100 health.")
                 
-                -- Call the suit
-                ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("CallSuit"):FireServer()
+                -- Continuously target the player until their health is 0
+                while player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 do
+                    -- Call the suit
+                    ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("CallSuit"):FireServer()
 
-                -- Teleport the player to the specified position
-                local targetTeleportPosition = Vector3.new(-1838, -217, 726)
-                player.Character:SetPrimaryPartCFrame(CFrame.new(targetTeleportPosition))
+                    -- Teleport the player to the specified position
+                    local targetTeleportPosition = Vector3.new(-1838, -217, 726)
+                    player.Character:SetPrimaryPartCFrame(CFrame.new(targetTeleportPosition))
 
-                -- Fire the beam at the player
-                local args = {
-                    [1] = "Repulsor",
-                    [2] = "center",
-                    [3] = player.Character:FindFirstChild("HumanoidRootPart"),
-                    [4] = targetTeleportPosition
-                }
-                ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("Weapon"):FireServer(unpack(args))
+                    -- Fire the beam at the player
+                    local args = {
+                        [1] = "Repulsor",
+                        [2] = "center",
+                        [3] = player.Character:FindFirstChild("HumanoidRootPart"),
+                        [4] = targetTeleportPosition
+                    }
+                    ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("Weapon"):FireServer(unpack(args))
+                    
+                    -- Print debug info
+                    print("Firing beam at player:", player.DisplayName)
+                    
+                    wait(0.1)  -- Fire every 0.1 seconds
+                end
                 
-                print("Firing beam at player:", player.DisplayName)
+                -- Wait 1 second and eject the suit after the player is dead
+                print(player.Name .. " is dead. Ejecting suit.")
+                wait(1)
+                ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
+            else
+                print(player.Name .. " does not meet the health requirement or is out of range.")
             end
         end
     else
         print("Target player not found or does not have a character.")
     end
 end
+
 
 -- Function to handle checking proximity of tracked players for the `..` command
 local function checkTargetedPlayersProximity()
