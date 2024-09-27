@@ -221,32 +221,39 @@ end
 
 -- Function to check if a specific player is within detection radius and target them
 local function detectAndTargetPlayer(player)
-    local playerPosition = player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character.HumanoidRootPart.Position
-    if playerPosition and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        local localPlayerPosition = LocalPlayer.Character.HumanoidRootPart.Position
-        local distance = getDistance(localPlayerPosition, playerPosition)
+    local targetPlayer = Players:FindFirstChild(targetPlayerName)
+    
+    if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local targetPlayerPosition = targetPlayer.Character.HumanoidRootPart.Position
         
-        if distance <= detectionRadius and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 then
-            print(player.Name .. " is within " .. detectionRadius .. " studs.")
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            local playerPosition = player.Character.HumanoidRootPart.Position
+            local distance = getDistance(targetPlayerPosition, playerPosition)
             
-            -- Call the suit
-            ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("CallSuit"):FireServer()
+            if distance <= detectionRadius and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 then
+                print(player.Name .. " is within " .. detectionRadius .. " studs of " .. targetPlayerName .. ".")
+                
+                -- Call the suit
+                ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("CallSuit"):FireServer()
 
-            -- Teleport the player to the specified position
-            local targetTeleportPosition = Vector3.new(-1838, -217, 726)
-            player.Character:SetPrimaryPartCFrame(CFrame.new(targetTeleportPosition))
+                -- Teleport the player to the specified position
+                local targetTeleportPosition = Vector3.new(-1838, -217, 726)
+                player.Character:SetPrimaryPartCFrame(CFrame.new(targetTeleportPosition))
 
-            -- Fire the beam at the player
-            local args = {
-                [1] = "Repulsor",
-                [2] = "center",
-                [3] = player.Character:FindFirstChild("HumanoidRootPart"),
-                [4] = targetTeleportPosition
-            }
-            ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("Weapon"):FireServer(unpack(args))
-            
-            print("Firing beam at player:", player.DisplayName)
+                -- Fire the beam at the player
+                local args = {
+                    [1] = "Repulsor",
+                    [2] = "center",
+                    [3] = player.Character:FindFirstChild("HumanoidRootPart"),
+                    [4] = targetTeleportPosition
+                }
+                ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("Weapon"):FireServer(unpack(args))
+                
+                print("Firing beam at player:", player.DisplayName)
+            end
         end
+    else
+        print("Target player not found or does not have a character.")
     end
 end
 
