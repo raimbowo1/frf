@@ -1,4 +1,4 @@
-print("new version2")
+print("new version3")
 
 local targetPlayerName = "iamdebesdt"
 local detectionRadius = 300
@@ -7,6 +7,7 @@ local loopAllEnabled = false -- Flag to control looped targeting
 local whitelist = {}  -- Table to store whitelisted players
 local permissions = {}  -- Table to store players with permission to use the "." command
 local permissionConnections = {}  -- Table to store connections to `Chatted` event for players with permission
+local targetedPlayers = {}  -- Table to store players being tracked by the `..` command
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -126,7 +127,8 @@ local function targetAllPlayers()
     ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
 end
 
--- Function to detect and target players within the radius, but skip whitelisted players
+
+
 local function detectAndTargetPlayers()
     if not detectionEnabled then
         return
@@ -188,6 +190,75 @@ local function detectAndTargetPlayers()
         end
     else
         print("Target player not found or does not have a character.")
+    end
+end
+
+
+
+-- Add player to target list for `..` command
+local function addTargetPlayer(playerName)
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player.Name:lower():find(playerName, 1, true) or player.DisplayName:lower():find(playerName, 1, true) then
+            table.insert(targetedPlayers, player)
+            print(player.Name .. " is now being tracked for proximity targeting.")
+            return
+        end
+    end
+    print("Player not found for targeting.")
+end
+
+-- Remove player from target list for `...` command
+local function removeTargetPlayer(playerName)
+    for i, player in ipairs(targetedPlayers) do
+        if player.Name:lower():find(playerName, 1, true) or player.DisplayName:lower():find(playerName, 1, true) then
+            table.remove(targetedPlayers, i)
+            print(player.Name .. " is no longer being tracked for proximity targeting.")
+            return
+        end
+    end
+    print("Player not found or not being tracked.")
+end
+
+-- Function to check if a specific player is within detection radius and target them
+local function detectAndTargetPlayer(player)
+    local playerPosition = player.Character and player.Character:FindFirstChild("HumanoidRootPart") and player.Character.HumanoidRootPart.Position
+    if playerPosition and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local localPlayerPosition = LocalPlayer.Character.HumanoidRootPart.Position
+        local distance = getDistance(localPlayerPosition, playerPosition)
+        
+        if distance <= detectionRadius and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 then
+            print(player.Name .. " is within " .. detectionRadius .. " studs.")
+            
+            -- Call the suit
+            ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("CallSuit"):FireServer()
+
+            -- Teleport the player to the specified position
+            local targetTeleportPosition = Vector3.new(-1838, -217, 726)
+            player.Character:SetPrimaryPartCFrame(CFrame.new(targetTeleportPosition))
+
+            -- Fire the beam at the player
+            local args = {
+                [1] = "Repulsor",
+                [2] = "center",
+                [3] = player.Character:FindFirstChild("HumanoidRootPart"),
+                [4] = targetTeleportPosition
+            }
+            ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("Weapon"):FireServer(unpack(args))
+            
+            print("Firing beam at player:", player.DisplayName)
+        end
+    end
+end
+
+-- Function to handle checking proximity of tracked players for the `..` command
+local function checkTargetedPlayersProximity()
+    while true do
+        for _, player in ipairs(targetedPlayers) do
+            if player and player.Character then
+                detectAndTargetPlayer(player)
+            end
+        end
+        wait(0.5) -- Check every 0.5 seconds to avoid overwhelming the server
     end
 end
 
@@ -256,6 +327,20 @@ local function onPlayerChat(message)
             end
         else
             print(playerName .. " does not have permission to use the '.' command.")
+        end
+    elseif words[1] == ".." then
+        if #words > 1 then
+            local playerToTarget = table.concat(words, " ", 2):lower()
+            addTargetPlayer(playerToTarget)
+        else
+            print("Usage: .. (partial_username or display_name)")
+        end
+    elseif words[1] == "..." then
+        if #words > 1 then
+            local playerToStop = table.concat(words, " ", 2):lower()
+            removeTargetPlayer(playerToStop)
+        else
+            print("Usage: ... (partial_username or display_name)")
         end
     elseif words[1] == "+" then
         if #words > 1 then
@@ -332,6 +417,9 @@ local function checkProximity()
     end
 end
 
+-- Start proximity checks for the new `..` and `...` command
+spawn(checkTargetedPlayersProximity)
+
 game.Players.PlayerAdded:Connect(function(player)
     -- Connect their Chatted event (for non-permission commands)
     player.Chatted:Connect(onPlayerChat)
@@ -347,13 +435,15 @@ Commands available:
 
 1. `. (target)` – Targets a specific player for kill.
 2. `. all` – Targets all players with health above 100.
-3. `-` – Enable kill aura within 300 studs; kills anyone with more than 100 health.
-4. `--` – Disable the kill aura.
-5. `/` – Loop kill everyone with health above 100.
-6. `//` – Stop the loop kill.
-7. `+ (target)` – Whitelist players from kill aura, kill all, and loop kill.
-8. `++ (target)` – Unwhitelist players.
-9. `, (target)` – Grant a player permission to use the `. command`.
-10. `,, (target)` – Remove a player's permission.
+3. `.. (target)` – Starts targeting a specific player within 300 studs.
+4. `... (target)` – Stops targeting a specific player.
+5. `-` – Enable kill aura within 300 studs; kills anyone with more than 100 health.
+6. `--` – Disable the kill aura.
+7. `/` – Loop kill everyone with health above 100.
+8. `//` – Stop the loop kill.
+9. `+ (target)` – Whitelist players from kill aura, kill all, and loop kill.
+10. `++ (target)` – Unwhitelist players.
+11. `, (target)` – Grant a player permission to use the `. command`.
+12. `,, (target)` – Remove a player's permission.
 
 ]])
