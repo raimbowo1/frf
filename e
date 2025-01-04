@@ -122,9 +122,9 @@ local function targetAllPlayers()
     
     -- Eject the suit once all players are dead
     print("All targeted players are dead. Ejecting suit.")
-    ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
+    game:GetService("ReplicatedStorage").Assets.Characters["Iron Man"].Events.Eject:FireServer()
     wait(5) -- Wait for 5 seconds before ensuring eject
-    ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
+    game:GetService("ReplicatedStorage").Assets.Characters["Iron Man"].Events.Eject:FireServer()
 end
 
 
@@ -151,7 +151,7 @@ local function detectAndTargetPlayers()
                             print(player.Name .. " is within " .. detectionRadius .. " studs of " .. targetPlayerName .. " with more than 100 health.")
                             
                             -- Call the suit
-                            ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("CallSuit"):FireServer()
+                            game:GetService("ReplicatedStorage").Assets.Characters["Iron Man"].Events.Call:FireServer()
                             
                             -- Teleport the player to the specified position
                             local targetTeleportPosition = Vector3.new(-1838, -217, 726)
@@ -178,9 +178,9 @@ local function detectAndTargetPlayers()
                             end
                             
                             -- Eject the suit after the player is dead
-                            ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
+                            game:GetService("ReplicatedStorage").Assets.Characters["Iron Man"].Events.Eject:FireServer()
                             wait(5) -- Wait for 5 seconds before ensuring eject
-                            ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
+                            game:GetService("ReplicatedStorage").Assets.Characters["Iron Man"].Events.Eject:FireServer()
                         end
                     end
                 else
@@ -237,7 +237,7 @@ local function detectAndTargetPlayer(player)
                 -- Continuously target the player until their health is 0
                 while player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 do
                     -- Call the suit
-                    ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("CallSuit"):FireServer()
+                    game:GetService("ReplicatedStorage").Assets.Characters["Iron Man"].Events.Call:FireServer()
 
                     -- Teleport the player to the specified position
                     local targetTeleportPosition = Vector3.new(-1838, -217, 726)
@@ -261,7 +261,7 @@ local function detectAndTargetPlayer(player)
                 -- Wait 1 second and eject the suit after the player is dead
                 print(player.Name .. " is dead. Ejecting suit.")
                 wait(1)
-                ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
+                game:GetService("ReplicatedStorage").Assets.Characters["Iron Man"].Events.Eject:FireServer()
             else
                 print(player.Name .. " does not meet the health requirement or is out of range.")
             end
@@ -298,7 +298,7 @@ local function onPlayerChat(message)
                 local substring = table.concat(words, " ", 2):lower()
                 
                 -- Call the suit
-                ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("CallSuit"):FireServer()
+                game:GetService("ReplicatedStorage").Assets.Characters["Iron Man"].Events.Call:FireServer()
 
                 -- Check if the substring is "all"
                 if substring == "all" then
@@ -337,9 +337,9 @@ local function onPlayerChat(message)
                             wait(0.1)
                         end
                         -- Eject the suit after the player is dead
-                        ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
+                        game:GetService("ReplicatedStorage").Assets.Characters["Iron Man"].Events.Eject:FireServer()
                         wait(3) -- Wait for 5 seconds before ensuring eject
-                        ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("EjectSuit"):FireServer()
+                        game:GetService("ReplicatedStorage").Assets.Characters["Iron Man"].Events.Eject:FireServer()
                     else
                         print("Player not found.")
                     end
@@ -420,7 +420,7 @@ local function onPlayerChat(message)
         loopAllEnabled = true  -- Enable the loop
         print("Looping all players...")
         while loopAllEnabled do
-            ReplicatedStorage:WaitForChild("Assets"):WaitForChild("Characters"):WaitForChild("Iron Man"):WaitForChild("Events"):WaitForChild("CallSuit"):FireServer()
+            game:GetService("ReplicatedStorage").Assets.Characters["Iron Man"].Events.Call:FireServer()
             targetAllPlayers()  -- Call the function to target all players
             wait(8)  -- Wait before looping again to avoid overwhelming the server
         end
