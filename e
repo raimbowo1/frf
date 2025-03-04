@@ -106,7 +106,7 @@ local function targetAllPlayers()
                     [3] = playerToBring.Character:FindFirstChild("HumanoidRootPart"),
                     [4] = targetPosition
                 }
-                game:GetService("ReplicatedStorage").Assets.Characters.IronMan.Events.("Weapon"):FireServer()
+                game:GetService("ReplicatedStorage").Assets.Characters.IronMan.Events.Weapon:FireServer()
                 
                 -- Print debug info
                 print("Firing beam at player:", playerToBring.DisplayName)
@@ -169,7 +169,7 @@ local function detectAndTargetPlayers()
                                     [3] = player.Character:FindFirstChild("HumanoidRootPart"),
                                     [4] = targetTeleportPosition
                                 }
-                                game:GetService("ReplicatedStorage").Assets.Characters.IronMan.Events.("Weapon"):FireServer()
+                                game:GetService("ReplicatedStorage").Assets.Characters.IronMan.Events.Weapon:FireServer()
                                 
                                 -- Print debug info
                                 print("Firing beam at player:", player.DisplayName)
@@ -250,7 +250,7 @@ local function detectAndTargetPlayer(player)
                         [3] = player.Character:FindFirstChild("HumanoidRootPart"),
                         [4] = targetTeleportPosition
                     }
-                    game:GetService("ReplicatedStorage").Assets.Characters.IronMan.Events.("Weapon"):FireServer()
+                    game:GetService("ReplicatedStorage").Assets.Characters.IronMan.Events.Weapon:FireServer()
                     
                     -- Print debug info
                     print("Firing beam at player:", player.DisplayName)
@@ -328,7 +328,7 @@ local function onPlayerChat(message)
                                 [3] = playerToBring.Character.PrimaryPart,
                                 [4] = targetPosition
                             }
-                            game:GetService("ReplicatedStorage").Assets.Characters.IronMan.Events.("Weapon"):FireServer()
+                            game:GetService("ReplicatedStorage").Assets.Characters.IronMan.Events.Weapon:FireServer()
 
                             -- Print the targeted player and position
                             print("Targeting player:", playerToBring.DisplayName, "at position:", targetPosition)
