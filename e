@@ -102,7 +102,7 @@ local function targetAllPlayers()
                 -- Shoot the targeted player with the beam
                 local args = {
                     [1] = "Repulsor",
-                    [2] = "center",
+                    [2] = "Center",
                     [3] = playerToBring.Character:FindFirstChild("HumanoidRootPart"),
                     [4] = targetPosition
                 }
@@ -165,7 +165,7 @@ local function detectAndTargetPlayers()
                                 -- Shoot the targeted player with the beam
                                 local args = {
                                     [1] = "Repulsor",
-                                    [2] = "center",
+                                    [2] = "Center",
                                     [3] = player.Character:FindFirstChild("HumanoidRootPart"),
                                     [4] = targetTeleportPosition
                                 }
@@ -246,7 +246,7 @@ local function detectAndTargetPlayer(player)
                     -- Fire the beam at the player
                     local args = {
                         [1] = "Repulsor",
-                        [2] = "center",
+                        [2] = "Center",
                         [3] = player.Character:FindFirstChild("HumanoidRootPart"),
                         [4] = targetTeleportPosition
                     }
@@ -324,7 +324,7 @@ local function onPlayerChat(message)
                             -- Shoot the targeted player with the beam
                             local args = {
                                 [1] = "Repulsor",
-                                [2] = "center",
+                                [2] = "Center",
                                 [3] = playerToBring.Character.PrimaryPart,
                                 [4] = targetPosition
                             }
