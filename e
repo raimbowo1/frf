@@ -151,7 +151,7 @@ local function detectAndTargetPlayers()
                             print(player.Name .. " is within " .. detectionRadius .. " studs of " .. targetPlayerName .. " with more than 100 health.")
                             
                             -- Call the suit
-                            game:GetService("ReplicatedStorage").Assets.Characters["Iron Man"].Events.Call:FireServer()
+                           game:GetService("ReplicatedStorage").Assets.Characters.IronMan.Events.Call:FireServer()
                             
                             -- Teleport the player to the specified position
                             local targetTeleportPosition = Vector3.new(-1838, -217, 726)
@@ -237,7 +237,7 @@ local function detectAndTargetPlayer(player)
                 -- Continuously target the player until their health is 0
                 while player.Character and player.Character:FindFirstChild("Humanoid") and player.Character.Humanoid.Health > 0 do
                     -- Call the suit
-                    game:GetService("ReplicatedStorage").Assets.Characters["Iron Man"].Events.Call:FireServer()
+                   game:GetService("ReplicatedStorage").Assets.Characters.IronMan.Events.Call:FireServer()
 
                     -- Teleport the player to the specified position
                     local targetTeleportPosition = Vector3.new(-1838, -217, 726)
@@ -298,7 +298,7 @@ local function onPlayerChat(message)
                 local substring = table.concat(words, " ", 2):lower()
                 
                 -- Call the suit
-                game:GetService("ReplicatedStorage").Assets.Characters["Iron Man"].Events.Call:FireServer()
+               game:GetService("ReplicatedStorage").Assets.Characters.IronMan.Events.Call:FireServer()
 
                 -- Check if the substring is "all"
                 if substring == "all" then
@@ -420,7 +420,7 @@ local function onPlayerChat(message)
         loopAllEnabled = true  -- Enable the loop
         print("Looping all players...")
         while loopAllEnabled do
-            game:GetService("ReplicatedStorage").Assets.Characters["Iron Man"].Events.Call:FireServer()
+           game:GetService("ReplicatedStorage").Assets.Characters.IronMan.Events.Call:FireServer()
             targetAllPlayers()  -- Call the function to target all players
             wait(8)  -- Wait before looping again to avoid overwhelming the server
         end
