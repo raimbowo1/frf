@@ -122,9 +122,9 @@ local function targetAllPlayers()
     
     -- Eject the suit once all players are dead
     print("All targeted players are dead. Ejecting suit.")
-    game:GetService("ReplicatedStorage").Assets.Characters["Iron Man"].Events.Eject:FireServer()
+    game:GetService("ReplicatedStorage").Assets.Characters.IronMan.Events.Eject:FireServer()
     wait(5) -- Wait for 5 seconds before ensuring eject
-    game:GetService("ReplicatedStorage").Assets.Characters["Iron Man"].Events.Eject:FireServer()
+    game:GetService("ReplicatedStorage").Assets.Characters.IronMan.Events.Eject:FireServer()
 end
 
 
@@ -178,9 +178,9 @@ local function detectAndTargetPlayers()
                             end
                             
                             -- Eject the suit after the player is dead
-                            game:GetService("ReplicatedStorage").Assets.Characters["Iron Man"].Events.Eject:FireServer()
+                            game:GetService("ReplicatedStorage").Assets.Characters.IronMan.Events.Eject:FireServer()
                             wait(5) -- Wait for 5 seconds before ensuring eject
-                            game:GetService("ReplicatedStorage").Assets.Characters["Iron Man"].Events.Eject:FireServer()
+                            game:GetService("ReplicatedStorage").Assets.Characters.IronMan.Events.Eject:FireServer()
                         end
                     end
                 else
@@ -261,7 +261,7 @@ local function detectAndTargetPlayer(player)
                 -- Wait 1 second and eject the suit after the player is dead
                 print(player.Name .. " is dead. Ejecting suit.")
                 wait(1)
-                game:GetService("ReplicatedStorage").Assets.Characters["Iron Man"].Events.Eject:FireServer()
+                game:GetService("ReplicatedStorage").Assets.Characters.IronMan.Events.Eject:FireServer()
             else
                 print(player.Name .. " does not meet the health requirement or is out of range.")
             end
@@ -337,9 +337,9 @@ local function onPlayerChat(message)
                             wait(0.1)
                         end
                         -- Eject the suit after the player is dead
-                        game:GetService("ReplicatedStorage").Assets.Characters["Iron Man"].Events.Eject:FireServer()
+                        game:GetService("ReplicatedStorage").Assets.Characters.IronMan.Events.Eject:FireServer()
                         wait(3) -- Wait for 5 seconds before ensuring eject
-                        game:GetService("ReplicatedStorage").Assets.Characters["Iron Man"].Events.Eject:FireServer()
+                        game:GetService("ReplicatedStorage").Assets.Characters.IronMan.Events.Eject:FireServer()
                     else
                         print("Player not found.")
                     end
