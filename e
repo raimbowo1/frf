@@ -98,7 +98,7 @@ local function targetAllPlayers()
                 
                 -- Teleport the player to the specified position
                 playerToBring.Character:SetPrimaryPartCFrame(CFrame.new(targetPosition))
-                
+                -- ISSUE AROUND HERE
                 -- Shoot the targeted player with the beam
                 local args = {
                     [1] = "Repulsor",
